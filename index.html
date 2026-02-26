@@ -5,64 +5,142 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Katalog vín</title>
   <style>
-    :root{--bg:#0d0f12;--card:#171b21;--line:#2a313c;--text:#eef2f7;--muted:#9aa7b8;--accent:#cfa04a}
-    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#10151c,#0b0e13);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
-    .wrap{max-width:1200px;margin:auto;padding:20px}
-    h1{margin:0 0 6px;font-size:34px} .muted{color:var(--muted)}
-    .top{position:sticky;top:0;background:#0d0f12cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:10}
-    .topin{max-width:1200px;margin:auto;padding:12px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .btn{background:#1a2029;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
-    .btn.active{border-color:var(--accent);color:#ffd58e}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:16px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-    .img{aspect-ratio:4/5;background:#0f1318;object-fit:cover;width:100%}
+    :root{
+      --bg:#f6f1e8;
+      --paper:#fffaf1;
+      --card:#ffffff;
+      --line:#e8dccb;
+      --text:#2b2216;
+      --muted:#7f6d56;
+      --accent:#8b6a3c;
+      --accent-soft:#efe3d1;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top,#fef8ed,#f5eddf 60%,#f2e8d8);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+
+    .top{position:sticky;top:0;z-index:20;background:#fff9f0d9;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+    .topin{max-width:1240px;margin:auto;padding:14px 18px;display:grid;gap:10px}
+    .brand{font-size:22px;font-weight:700;letter-spacing:.02em}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    .btn{border:1px solid var(--line);background:var(--paper);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
+    .btn:hover{border-color:#d5b78a}
+    .btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+    .search{margin-left:auto;min-width:240px;max-width:340px;flex:1}
+    .search input{width:100%;padding:10px 12px;border-radius:999px;border:1px solid var(--line);background:#fffdf8;color:var(--text)}
+
+    .wrap{max-width:1240px;margin:auto;padding:16px 18px 30px}
+    .meta{color:var(--muted);font-size:13px;margin-bottom:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 3px 10px #3b2d180f}
+    .img{aspect-ratio:4/5;background:#f3eadb;object-fit:cover;width:100%}
     .body{padding:12px;display:flex;flex-direction:column;gap:8px}
-    .name{font-weight:700;font-size:14px;line-height:1.35;min-height:38px}
+    .name{font-weight:700;font-size:13px;line-height:1.35;min-height:50px;text-transform:none}
     .chips{display:flex;gap:6px;flex-wrap:wrap}
-    .chip{font-size:11px;padding:4px 7px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-    .price{font-weight:700;color:#ffd58e}
-    .meta{font-size:12px;color:var(--muted);line-height:1.4;min-height:34px}
-    .section{margin-top:26px}
+    .chip{font-size:11px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--paper)}
+    .price{font-weight:700;color:var(--accent)}
+    .profile{font-size:12px;color:#5f4d36;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:52px}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .linkbtn{font-size:12px;color:var(--accent);text-decoration:none;font-weight:700}
+
+    .empty{padding:24px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);background:#fff}
+
+    @media (max-width:680px){
+      .search{order:9;min-width:100%;margin-left:0}
+      .topin{padding:12px}
+      .wrap{padding:14px 12px 24px}
+    }
   </style>
 </head>
 <body>
-  <div class="top"><div class="topin">
-    <button class="btn active" data-filter="all">Vše</button>
-    <button class="btn" data-filter="bila-vina">Bílá</button>
-    <button class="btn" data-filter="sumiva-vina">Šumivá</button>
-    <button class="btn" data-filter="ruzova-vina">Růžová</button>
-  </div></div>
-  <div class="wrap">
-    <h1>Katalog vín</h1>
-    <div class="muted">Pracovní verze bez marketingových textů • pouze produkty (bez červených vín)</div>
-    <div id="grid" class="grid"></div>
-  </div>
-<script>
-let items=[]; let filter='all';
-const grid=document.getElementById('grid');
-function card(i){
-  return `<article class="card" data-category="${i.category}">
-    <img class="img" loading="lazy" src="${i.image || ''}" alt="${i.name}">
-    <div class="body">
-      <div class="name">${i.name}</div>
-      <div class="chips">
-        <span class="chip">${i.category_label}</span>
-        ${i.brand ? `<span class="chip">${i.brand}</span>`:''}
+  <header class="top">
+    <div class="topin">
+      <div class="brand">Katalog vín</div>
+      <div class="controls">
+        <button class="btn active" data-filter="all">Vše</button>
+        <button class="btn" data-filter="bila-vina">Bílá</button>
+        <button class="btn" data-filter="sumiva-vina">Šumivá</button>
+        <button class="btn" data-filter="ruzova-vina">Růžová</button>
+        <div class="search"><input id="search" type="search" placeholder="Hledat podle názvu nebo odrůdy" /></div>
       </div>
-      <div class="price">${i.price || ''}</div>
-      <div class="meta">${i.locality || ''}</div>
     </div>
-  </article>`
+  </header>
+
+  <main class="wrap">
+    <div class="meta" id="meta">Načítám katalog…</div>
+    <div id="grid" class="grid"></div>
+  </main>
+
+<script>
+let items=[];
+let filter='all';
+let query='';
+
+const grid=document.getElementById('grid');
+const meta=document.getElementById('meta');
+const searchEl=document.getElementById('search');
+
+function esc(v){
+  return String(v ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#39;');
 }
+
+function card(i){
+  return `<article class="card" data-category="${esc(i.category)}">
+    <img class="img" loading="lazy" src="${esc(i.image || '')}" alt="${esc(i.name)}">
+    <div class="body">
+      <div class="name">${esc(i.name)}</div>
+      <div class="chips">
+        <span class="chip">${esc(i.category_label)}</span>
+        ${i.brand ? `<span class="chip">${esc(i.brand)}</span>`:''}
+      </div>
+      <div class="price">${esc(i.price || '')}</div>
+      <div class="profile">${esc(i.profile || '')}</div>
+      <div class="row">
+        <span class="chip">${esc(i.locality || 'Původ bude doplněn')}</span>
+        ${i.url ? `<a class="linkbtn" target="_blank" rel="noopener" href="${esc(i.url)}">Zdroj</a>`:''}
+      </div>
+    </div>
+  </article>`;
+}
+
+function applyFilters(data){
+  let out = filter==='all' ? data : data.filter(i=>i.category===filter);
+  if(query){
+    const q=query.toLowerCase();
+    out = out.filter(i => (i.name||'').toLowerCase().includes(q) || (i.grape||'').toLowerCase().includes(q) || (i.profile||'').toLowerCase().includes(q));
+  }
+  return out;
+}
+
 function render(){
-  const data = filter==='all' ? items : items.filter(i=>i.category===filter);
-  grid.innerHTML=data.map(card).join('');
+  const data = applyFilters(items);
+  if(!data.length){
+    grid.innerHTML='<div class="empty">Nic nenalezeno. Zkus jiný filtr nebo hledání.</div>';
+  } else {
+    grid.innerHTML=data.map(card).join('');
+  }
+  meta.textContent=`Položek: ${data.length} z ${items.length} • informační katalog (bez červených vín, bez e-shopu)`;
 }
-fetch('./data.json').then(r=>r.json()).then(d=>{items=d; render();});
+
+fetch('./data.json')
+  .then(r=>r.json())
+  .then(d=>{items=d;render();})
+  .catch(()=>{meta.textContent='Nepodařilo se načíst data katalogu.'});
+
 document.querySelectorAll('.btn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
   filter=b.dataset.filter; render();
 });
+
+searchEl.addEventListener('input',()=>{query=searchEl.value.trim();render();});
 </script>
-</body></html>
+</body>
+</html>
