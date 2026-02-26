@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Katalog vín</title>
+  <style>
+    :root{--bg:#0d0f12;--card:#171b21;--line:#2a313c;--text:#eef2f7;--muted:#9aa7b8;--accent:#cfa04a}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#10151c,#0b0e13);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+    .wrap{max-width:1200px;margin:auto;padding:20px}
+    h1{margin:0 0 6px;font-size:34px} .muted{color:var(--muted)}
+    .top{position:sticky;top:0;background:#0d0f12cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:10}
+    .topin{max-width:1200px;margin:auto;padding:12px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{background:#1a2029;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn.active{border-color:var(--accent);color:#ffd58e}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+    .img{aspect-ratio:4/5;background:#0f1318;object-fit:cover;width:100%}
+    .body{padding:12px;display:flex;flex-direction:column;gap:8px}
+    .name{font-weight:700;font-size:14px;line-height:1.35;min-height:38px}
+    .chips{display:flex;gap:6px;flex-wrap:wrap}
+    .chip{font-size:11px;padding:4px 7px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+    .price{font-weight:700;color:#ffd58e}
+    .meta{font-size:12px;color:var(--muted);line-height:1.4;min-height:34px}
+    .section{margin-top:26px}
+  </style>
+</head>
+<body>
+  <div class="top"><div class="topin">
+    <button class="btn active" data-filter="all">Vše</button>
+    <button class="btn" data-filter="bila-vina">Bílá</button>
+    <button class="btn" data-filter="sumiva-vina">Šumivá</button>
+    <button class="btn" data-filter="ruzova-vina">Růžová</button>
+  </div></div>
+  <div class="wrap">
+    <h1>Katalog vín</h1>
+    <div class="muted">Pracovní verze bez marketingových textů • pouze produkty (bez červených vín)</div>
+    <div id="grid" class="grid"></div>
+  </div>
+<script>
+let items=[]; let filter='all';
+const grid=document.getElementById('grid');
+function card(i){
+  return `<article class="card" data-category="${i.category}">
+    <img class="img" loading="lazy" src="${i.image || ''}" alt="${i.name}">
+    <div class="body">
+      <div class="name">${i.name}</div>
+      <div class="chips">
+        <span class="chip">${i.category_label}</span>
+        ${i.brand ? `<span class="chip">${i.brand}</span>`:''}
+      </div>
+      <div class="price">${i.price || ''}</div>
+      <div class="meta">${i.locality || ''}</div>
+    </div>
+  </article>`
+}
+function render(){
+  const data = filter==='all' ? items : items.filter(i=>i.category===filter);
+  grid.innerHTML=data.map(card).join('');
+}
+fetch('./data.json').then(r=>r.json()).then(d=>{items=d; render();});
+document.querySelectorAll('.btn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  filter=b.dataset.filter; render();
+});
+</script>
+</body></html>
